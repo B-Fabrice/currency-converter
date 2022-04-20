@@ -1,10 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function Converter() {
     const [drop1, setDrop1] = useState(false);
     const [drop2, setDrop2] = useState(false);
 
     const [shift, setShift] = useState(false);
+
+    const [amount1, setAmount1] = useState(1);
+    const [amount2, setAmount2] = useState(1);
+
+    const [currency1, setCurrency1] = useState('USD');
+    const [currency2, setCurrency2] = useState('EUR');
+
+    const [result, setResult] = useState('');
+
+    const [conversion, setConversion] = useState([]);
+    const [countries, SetCountries] = useState([]);
+
+    const getCurrency = useCallback(async() => {
+        const res = await fetch('https://v6.exchangerate-api.com/v6/7460e40c8a04beb4b4acebc1/latest/USD', {
+            method: 'GET',
+        });
+
+        const data = await res.json();
+        if (res.status === 200) {
+            setConversion(data.conversion_rates);
+        }
+    }, []);
+
+    useEffect(() => {
+        getCurrency();
+    });
 
     return ( 
         <div className="cal-container">
@@ -65,7 +91,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" /> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" onChange={(event) => setAmount1(event.target.value)}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -136,7 +162,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" /> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" onChange={(event) => setAmount1(event.target.value)}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -148,7 +174,7 @@ function Converter() {
                     <h2>Result</h2>
 
                     <div className="result body">
-                        <p>1 USD = 1023 RWF</p>
+                        <p>{result}</p>
                     </div>
                 </div>
 
