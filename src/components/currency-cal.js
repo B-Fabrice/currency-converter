@@ -28,9 +28,21 @@ function Converter() {
         }
     }, []);
 
+    const getCountries = useCallback(async() => {
+        const res = await fetch(' https://v6.exchangerate-api.com/v6/7460e40c8a04beb4b4acebc1/codes', {
+            method: 'GET',
+        });
+
+        const data = await res.json();
+        if (res.status === 200) {
+            SetCountries(data.supported_codes);
+        }
+    }, []);
+
     useEffect(() => {
         getCurrency();
-    });
+        getCountries();
+    }, []);
 
     return ( 
         <div className="cal-container">
@@ -46,28 +58,18 @@ function Converter() {
                                 <legend>from</legend>
                                 <div className="dropdown">
                                     <div id="myDropdown" className="dropdown-content" style={{display: drop1 ? "block" : "none"}}>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
+                                        {countries.length ? countries.map((e, i) => (
+                                            <p key={i} onClick={() => {
+                                                setCurrency1(e[0]);
+                                                setDrop1(false);
+                                            }}><strong>{ e[0] }</strong> - {e[1]}</p>
+                                        )) : <></>}
                                     </div>
                                 </div>
 
                                 <div className="cinfo">            
                                     <div className="cname">
-                                        <h3>USD</h3>
+                                        <h3>{currency1}</h3>
                                     </div>
         
                                     <div className="cselect">
@@ -117,22 +119,12 @@ function Converter() {
                                 <legend>to</legend>
                                 <div className="dropdown">
                                     <div id="myDropdown" className="dropdown-content" style={{display: drop2 ? "block" : "none"}}>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
-                                        <p><strong>USD</strong> - US Dollars</p>
-                                        <p><strong>RWF</strong> - Rwandan Francs</p>
+                                        {countries.length ? countries.map((e, i) => (
+                                            <p key={i} onClick={() => {
+                                                setCurrency2(e[0]);
+                                                setDrop2(false);
+                                            }}><strong>{ e[0] }</strong> - {e[1]}</p>
+                                        )) : <></>}
                                     </div>
                                 </div>
 
