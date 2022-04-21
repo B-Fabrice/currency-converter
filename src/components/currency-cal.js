@@ -57,7 +57,7 @@ function Converter() {
             SetCountries(data.supported_codes);
             CurrencyConverter(1, 'am1', cur, currency1, currency2);
         }
-    }, [CurrencyConverter]);
+    }, [CurrencyConverter, currency1, currency2]);
 
     const shifter = () => {
         setShift(!shift);
