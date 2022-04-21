@@ -73,7 +73,7 @@ function Converter() {
     useEffect(() => {
         getCurrency();
         getCountries();
-    }, []);
+    }, [getCurrency, getCountries]);
 
     return ( 
         <div className="cal-container">
