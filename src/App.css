@@ -15,16 +15,15 @@
  */
 
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;  
-  text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
-  box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
-  /* background-image: url('../public/5566879.jpg'); */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;  
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   background-image: url('../public/6068268.jpg');
 }
 
@@ -41,8 +40,6 @@ body {
    max-width: 800px;
    margin: auto;
    padding: 5px 30px;
-   display: flex;
-   justify-content: space-between;
  }
 
  .cal-container {

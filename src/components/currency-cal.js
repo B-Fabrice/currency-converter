@@ -29,16 +29,6 @@ function Converter() {
         }
     }, []);
 
-    const shifter = () => {
-        setShift(!shift);
-        setDrop1(false);
-        setDrop2(false);
-
-        var temp = currency1.slice();
-        setCurrency1(currency2);
-        setCurrency2(temp);
-    };
-
     const getCountries = useCallback(async() => {
         const res = await fetch(' https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/codes', {
             method: 'GET',
@@ -50,14 +40,14 @@ function Converter() {
         }
     }, []);
 
-    const CurrencyConverter = (event, type) => {
-        if (isNaN(event.target.value) ){
+    const CurrencyConverter = (value, type) => {
+        if (isNaN(value) ){
             setMessage('Please enter a valid number');
             return;
         }
         setMessage('');
 
-        var new_a = event.target.value;
+        var new_a = value;
         type === 'am1' ? setAmount1(new_a) : setAmount2(new_a);
         var rat1 = conversion[currency1];
         var rat2 = conversion[currency2];
@@ -66,8 +56,19 @@ function Converter() {
         var new_amount = (new_a / (type === 'am1' ? rat1 : rat2)) * (type === 'am1' ? rat2 : rat1);
         type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
         setResult( type === 'am1' ? 
-            `${Number(new_a).toFixed(2)} ${currency1}  =  ${new_amount.toFixed(2)} ${currency2}`
-            :`${Number(new_a).toFixed(2)} ${currency2}  =  ${amount2.toFixed(2)} ${currency1}`);
+            `1 ${currency1}  =  ${((1/rat1) * rat2).toFixed(6)} ${currency2}`
+            :`1 ${currency2}  =  ${((1/rat2) * rat1).toFixed(6)} ${currency1}`);
+    };
+
+    const shifter = () => {
+        setShift(!shift);
+        setDrop1(false);
+        setDrop2(false);
+
+        var temp = currency1.slice();
+        setCurrency1(currency2);
+        setCurrency2(temp);
+        CurrencyConverter(1, 'am1');
     };
 
     useEffect(() => {
@@ -95,6 +96,7 @@ function Converter() {
                                             <p key={i} onClick={() => {
                                                 setCurrency1(e[0]);
                                                 setDrop1(false);
+                                                CurrencyConverter(1, 'am1');
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -126,7 +128,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event, "am1")}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event.target.value, "am1")}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -152,6 +154,7 @@ function Converter() {
                                             <p key={i} onClick={() => {
                                                 setCurrency2(e[0]);
                                                 setDrop2(false);
+                                                CurrencyConverter(1, 'am2');
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -183,7 +186,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount2} onChange={(event) => CurrencyConverter(event, 'am2')}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2')}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -192,7 +195,7 @@ function Converter() {
                 </div>
 
                 <div className="result">
-                    <h2>Result</h2>
+                    <h2>Rating values</h2>
 
                     <div className="result body">
                         <p>{result}</p>
