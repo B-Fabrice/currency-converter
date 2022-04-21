@@ -18,16 +18,31 @@ function Converter() {
     const [conversion, setConversion] = useState([]);
     const [countries, SetCountries] = useState([]);
 
-    const getCurrency = useCallback(async() => {
-        const res = await fetch('https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/latest/USD', {
-            method: 'GET',
-        });
-
-        const data = await res.json();
-        if (res.status === 200) {
-            setConversion(data.conversion_rates);
+    const CurrencyConverter = useCallback((value, type) => {
+        if (isNaN(value) ){
+            setMessage('Please enter a valid number');
+            return;
         }
-    }, []);
+        setMessage('');
+
+        if (currency1 === currency2) {
+            setAmount1(value);
+            setAmount2(value);
+            setResult(`1 ${currency1} = ${value} ${currency2}`);
+            return;
+        }
+
+        var new_a = value;
+        type === 'am1' ? setAmount1(new_a) : setAmount2(new_a);
+        var rat1 = conversion[currency1];
+        var rat2 = conversion[currency2];
+
+        var new_amount = (new_a / (type === 'am1' ? rat1 : rat2)) * (type === 'am1' ? rat2 : rat1);
+        type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
+        setResult( type === 'am1' ? 
+            `1 ${currency1}  =  ${((1/rat1) * rat2).toFixed(6)} ${currency2}`
+            :`1 ${currency2}  =  ${((1/rat2) * rat1).toFixed(6)} ${currency1}`);
+    },[currency1, currency2, conversion]);
 
     const getCountries = useCallback(async() => {
         const res = await fetch(' https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/codes', {
@@ -37,28 +52,9 @@ function Converter() {
         const data = await res.json();
         if (res.status === 200) {
             SetCountries(data.supported_codes);
+            CurrencyConverter(1, 'am1');
         }
-    }, []);
-
-    const CurrencyConverter = (value, type) => {
-        if (isNaN(value) ){
-            setMessage('Please enter a valid number');
-            return;
-        }
-        setMessage('');
-
-        var new_a = value;
-        type === 'am1' ? setAmount1(new_a) : setAmount2(new_a);
-        var rat1 = conversion[currency1];
-        var rat2 = conversion[currency2];
-
-        console.log(rat1, rat2, new_a, type);
-        var new_amount = (new_a / (type === 'am1' ? rat1 : rat2)) * (type === 'am1' ? rat2 : rat1);
-        type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
-        setResult( type === 'am1' ? 
-            `1 ${currency1}  =  ${((1/rat1) * rat2).toFixed(6)} ${currency2}`
-            :`1 ${currency2}  =  ${((1/rat2) * rat1).toFixed(6)} ${currency1}`);
-    };
+    }, [CurrencyConverter]);
 
     const shifter = () => {
         setShift(!shift);
@@ -71,10 +67,21 @@ function Converter() {
         CurrencyConverter(1, 'am1');
     };
 
+    const getCurrency = useCallback(async() => {
+        const res = await fetch('https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/latest/USD', {
+            method: 'GET',
+        });
+
+        const data = await res.json();
+        if (res.status === 200) {
+            setConversion(data.conversion_rates);
+            await getCountries();
+        }
+    }, [getCountries]);
+
     useEffect(() => {
         getCurrency();
-        getCountries();
-    }, [getCurrency, getCountries]);
+    }, [getCurrency]);
 
     return ( 
         <div className="cal-container">
@@ -186,7 +193,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2')}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={isNaN(amount2) ? 0.00 : amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2')}/> 
                                 </div>
                             </fieldset>
                         </form>
