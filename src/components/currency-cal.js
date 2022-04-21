@@ -5,9 +5,10 @@ function Converter() {
     const [drop2, setDrop2] = useState(false);
 
     const [shift, setShift] = useState(false);
+    const [message, setMessage] = useState('');
 
-    const [amount1, setAmount1] = useState(1);
-    const [amount2, setAmount2] = useState(1);
+    const [amount1, setAmount1] = useState(0.00);
+    const [amount2, setAmount2] = useState(0.00);
 
     const [currency1, setCurrency1] = useState('USD');
     const [currency2, setCurrency2] = useState('EUR');
@@ -18,7 +19,7 @@ function Converter() {
     const [countries, SetCountries] = useState([]);
 
     const getCurrency = useCallback(async() => {
-        const res = await fetch('https://v6.exchangerate-api.com/v6/7460e40c8a04beb4b4acebc1/latest/USD', {
+        const res = await fetch('https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/latest/USD', {
             method: 'GET',
         });
 
@@ -28,8 +29,18 @@ function Converter() {
         }
     }, []);
 
+    const shifter = () => {
+        setShift(!shift);
+        setDrop1(false);
+        setDrop2(false);
+
+        var temp = currency1.slice();
+        setCurrency1(currency2);
+        setCurrency2(temp);
+    };
+
     const getCountries = useCallback(async() => {
-        const res = await fetch(' https://v6.exchangerate-api.com/v6/7460e40c8a04beb4b4acebc1/codes', {
+        const res = await fetch(' https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/codes', {
             method: 'GET',
         });
 
@@ -38,6 +49,26 @@ function Converter() {
             SetCountries(data.supported_codes);
         }
     }, []);
+
+    const CurrencyConverter = (event, type) => {
+        if (isNaN(event.target.value) ){
+            setMessage('Please enter a valid number');
+            return;
+        }
+        setMessage('');
+
+        var new_a = event.target.value;
+        type === 'am1' ? setAmount1(new_a) : setAmount2(new_a);
+        var rat1 = conversion[currency1];
+        var rat2 = conversion[currency2];
+
+        console.log(rat1, rat2, new_a, type);
+        var new_amount = (new_a / (type === 'am1' ? rat1 : rat2)) * (type === 'am1' ? rat2 : rat1);
+        type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
+        setResult( type === 'am1' ? 
+            `${Number(new_a).toFixed(2)} ${currency1}  =  ${new_amount.toFixed(2)} ${currency2}`
+            :`${Number(new_a).toFixed(2)} ${currency2}  =  ${amount2.toFixed(2)} ${currency1}`);
+    };
 
     useEffect(() => {
         getCurrency();
@@ -50,6 +81,8 @@ function Converter() {
                 <div className="head">
                     <h2>Currency Converter</h2>
                 </div>
+
+                {message ? <p className='mssg'>{message}</p> : <></>}
 
                 <div className="calbody">
                     <div className="form-cont">
@@ -93,18 +126,14 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" onChange={(event) => setAmount1(event.target.value)}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event, "am1")}/> 
                                 </div>
                             </fieldset>
                         </form>
                     </div>
 
                     <div className="mover">
-                        <div onClick={() => {
-                            setShift(!shift);
-                            setDrop1(false);
-                            setDrop2(false);
-                        }} className={shift ? "contm shifted" : "contm"}>
+                        <div onClick={() => shifter()} className={shift ? "contm shifted" : "contm"}>
                         <i>
                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" className="bi bi-arrow-left-right" viewBox="0 0 16 16">
                                 <path fillRule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/>
@@ -130,7 +159,7 @@ function Converter() {
 
                                 <div className="cinfo">            
                                     <div className="cname">
-                                        <h3>USD</h3>
+                                        <h3>{currency2}</h3>
                                     </div>
         
                                     <div className="cselect">
@@ -154,7 +183,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" onChange={(event) => setAmount1(event.target.value)}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount2} onChange={(event) => CurrencyConverter(event, 'am2')}/> 
                                 </div>
                             </fieldset>
                         </form>

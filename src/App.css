@@ -75,6 +75,11 @@ body {
   justify-content: space-between;
 }
 
+.calculator .mssg {
+  text-align: center;
+  color: #ff442f;
+}
+
 .calbody .form-cont {
   /* background-color: cadetblue; */
   width: 100%;
@@ -182,17 +187,6 @@ form .cinput {
   transition: transform 0.2s;
 }
 
-@media only screen and (max-width: 1000px) {
-  .calbody {
-    flex-direction: column !important;
-    justify-content: center !important;
-  }
-
-  .form-cont {
-    margin: auto;
-  }
-}
-
 .result {
   text-align: center;
 }
@@ -226,4 +220,21 @@ form .cinput {
 
 .mover .contm:hover {
   background-color: azure;
+}
+@media only screen and (max-width: 1000px) {
+  .calbody {
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+  .form-cont {
+    margin: auto;
+  }
+
+  .mover .contm {
+    transform: rotate(90deg);
+  }
+
+  .mover .contm.shifted {
+    transform: rotate(270deg);
+  }
 }
