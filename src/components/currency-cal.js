@@ -6,6 +6,7 @@ function Converter() {
 
     const [shift, setShift] = useState(false);
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(true);
 
     const [amount1, setAmount1] = useState(0.00);
     const [amount2, setAmount2] = useState(0.00);
@@ -18,7 +19,8 @@ function Converter() {
     const [conversion, setConversion] = useState([]);
     const [countries, SetCountries] = useState([]);
 
-    const CurrencyConverter = useCallback((value, type) => {
+    // eslint-disable-next-line
+    const CurrencyConverter = (value, type, rat1, rat2) => {
         if (isNaN(value) ){
             setMessage('Please enter a valid number');
             return;
@@ -32,27 +34,26 @@ function Converter() {
             return;
         }
 
-        var new_a = value;
-        type === 'am1' ? setAmount1(new_a) : setAmount2(new_a);
-        var rat1 = conversion[currency1];
-        var rat2 = conversion[currency2];
+        type === 'am1' ? setAmount1(value) : setAmount2(value);
+        var r1 = conversion[currency1] ? conversion[currency1] : rat1;
+        var r2 = conversion[currency2] ? conversion[currency2] : rat2;
 
-        var new_amount = (new_a / (type === 'am1' ? rat1 : rat2)) * (type === 'am1' ? rat2 : rat1);
+        var new_amount = (value / (type === 'am1' ? r1 : r2)) * (type === 'am1' ? r2 : r1);
         type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
         setResult( type === 'am1' ? 
-            `1 ${currency1}  =  ${((1/rat1) * rat2).toFixed(6)} ${currency2}`
-            :`1 ${currency2}  =  ${((1/rat2) * rat1).toFixed(6)} ${currency1}`);
-    },[currency1, currency2, conversion]);
+            `1 ${currency1}  =  ${((1/r1) * r2).toFixed(6)} ${currency2}`
+            :`1 ${currency2}  =  ${((1/r2) * r1).toFixed(6)} ${currency1}`);
+    };
 
-    const getCountries = useCallback(async() => {
-        const res = await fetch(' https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/codes', {
+    const getCountries = useCallback(async(cur) => {
+        const res = await fetch(' https://v6.exchangerate-api.com/v6/841b21e37b1c3252d9299fe1/codes', {
             method: 'GET',
         });
 
         const data = await res.json();
         if (res.status === 200) {
             SetCountries(data.supported_codes);
-            CurrencyConverter(1, 'am1');
+            CurrencyConverter(1, 'am1', 1, cur);
         }
     }, [CurrencyConverter]);
 
@@ -64,24 +65,27 @@ function Converter() {
         var temp = currency1.slice();
         setCurrency1(currency2);
         setCurrency2(temp);
-        CurrencyConverter(1, 'am1');
+        CurrencyConverter(1, 'am1', 1, 1);
     };
 
     const getCurrency = useCallback(async() => {
-        const res = await fetch('https://v6.exchangerate-api.com/v6/def52c353089ecb3096a5fbe/latest/USD', {
+        const res = await fetch('https://v6.exchangerate-api.com/v6/841b21e37b1c3252d9299fe1/latest/USD', {
             method: 'GET',
         });
 
         const data = await res.json();
         if (res.status === 200) {
             setConversion(data.conversion_rates);
-            await getCountries();
+            await getCountries(data.conversion_rates[currency2]);
         }
-    }, [getCountries]);
+    }, [getCountries, currency2]);
 
     useEffect(() => {
-        getCurrency();
-    }, [getCurrency]);
+        if (loading) {
+            getCurrency();
+            setLoading(false);
+        }
+    }, [getCurrency, loading]);
 
     return ( 
         <div className="cal-container">
@@ -103,7 +107,7 @@ function Converter() {
                                             <p key={i} onClick={() => {
                                                 setCurrency1(e[0]);
                                                 setDrop1(false);
-                                                CurrencyConverter(1, 'am1');
+                                                CurrencyConverter(1, 'am1', 1, 1);
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -135,7 +139,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event.target.value, "am1")}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event.target.value, "am1", 1, 1)}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -161,7 +165,7 @@ function Converter() {
                                             <p key={i} onClick={() => {
                                                 setCurrency2(e[0]);
                                                 setDrop2(false);
-                                                CurrencyConverter(1, 'am2');
+                                                CurrencyConverter(1, 'am2', 1, 1);
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -193,7 +197,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={isNaN(amount2) ? 0.00 : amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2')}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={isNaN(amount2) ? 0.00 : amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2', 1, 1)}/> 
                                 </div>
                             </fieldset>
                         </form>
