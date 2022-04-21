@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useStateCallback } from 'use-state-callback';
 
 function Converter() {
     const [drop1, setDrop1] = useState(false);
@@ -11,8 +12,8 @@ function Converter() {
     const [amount1, setAmount1] = useState(0.00);
     const [amount2, setAmount2] = useState(0.00);
 
-    const [currency1, setCurrency1] = useState('USD');
-    const [currency2, setCurrency2] = useState('EUR');
+    const [currency1, setCurrency1] = useStateCallback('USD');
+    const [currency2, setCurrency2] = useStateCallback('EUR');
 
     const [result, setResult] = useState('');
 
@@ -20,7 +21,7 @@ function Converter() {
     const [countries, SetCountries] = useState([]);
 
     // eslint-disable-next-line
-    const CurrencyConverter = (value, type, rat1, rat2) => {
+    const CurrencyConverter = (value, type, rat2, currency1, currency2) => {
         if (isNaN(value) ){
             setMessage('Please enter a valid number');
             return;
@@ -35,14 +36,15 @@ function Converter() {
         }
 
         type === 'am1' ? setAmount1(value) : setAmount2(value);
-        var r1 = conversion[currency1] ? conversion[currency1] : rat1;
+        var r1 = conversion[currency1] ? conversion[currency1] : 1;
         var r2 = conversion[currency2] ? conversion[currency2] : rat2;
+
 
         var new_amount = (value / (type === 'am1' ? r1 : r2)) * (type === 'am1' ? r2 : r1);
         type === 'am1' ? setAmount2(new_amount) : setAmount1(new_amount);
         setResult( type === 'am1' ? 
-            `1 ${currency1}  =  ${((1/r1) * r2).toFixed(6)} ${currency2}`
-            :`1 ${currency2}  =  ${((1/r2) * r1).toFixed(6)} ${currency1}`);
+            `1 ${currency1}  =  ${((1/r1) * r2).toFixed(4)} ${currency2}`
+            :`1 ${currency2}  =  ${((1/r2) * r1).toFixed(4)} ${currency1}`);
     };
 
     const getCountries = useCallback(async(cur) => {
@@ -53,7 +55,7 @@ function Converter() {
         const data = await res.json();
         if (res.status === 200) {
             SetCountries(data.supported_codes);
-            CurrencyConverter(1, 'am1', 1, cur);
+            CurrencyConverter(1, 'am1', cur, currency1, currency2);
         }
     }, [CurrencyConverter]);
 
@@ -65,7 +67,7 @@ function Converter() {
         var temp = currency1.slice();
         setCurrency1(currency2);
         setCurrency2(temp);
-        CurrencyConverter(1, 'am1', 1, 1);
+        CurrencyConverter(1, 'am1', 1, currency1, currency2);
     };
 
     const getCurrency = useCallback(async() => {
@@ -105,9 +107,9 @@ function Converter() {
                                     <div id="myDropdown" className="dropdown-content" style={{display: drop1 ? "block" : "none"}}>
                                         {countries.length ? countries.map((e, i) => (
                                             <p key={i} onClick={() => {
-                                                setCurrency1(e[0]);
+                                                setCurrency1(e[0], (updatedState) => CurrencyConverter(1, 'am1', 1, updatedState, currency2));
                                                 setDrop1(false);
-                                                CurrencyConverter(1, 'am1', 1, 1);
+                                                // CurrencyConverter(1, 'am1', 1);
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -139,7 +141,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event.target.value, "am1", 1, 1)}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={amount1} onChange={(event) => CurrencyConverter(event.target.value, "am1", 1, currency1, currency2)}/> 
                                 </div>
                             </fieldset>
                         </form>
@@ -163,9 +165,8 @@ function Converter() {
                                     <div id="myDropdown" className="dropdown-content" style={{display: drop2 ? "block" : "none"}}>
                                         {countries.length ? countries.map((e, i) => (
                                             <p key={i} onClick={() => {
-                                                setCurrency2(e[0]);
+                                                setCurrency2(e[0], (updatedState) => CurrencyConverter(1, 'am2', 1, updatedState, currency1));
                                                 setDrop2(false);
-                                                CurrencyConverter(1, 'am2', 1, 1);
                                             }}><strong>{ e[0] }</strong> - {e[1]}</p>
                                         )) : <></>}
                                     </div>
@@ -197,7 +198,7 @@ function Converter() {
                                 </div>
             
                                 <div className="cinput">
-                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={isNaN(amount2) ? 0.00 : amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2', 1, 1)}/> 
+                                    <input type="text" name="usd" id="usd" placeholder="0.00" value={isNaN(amount2) ? 0.00 : amount2} onChange={(event) => CurrencyConverter(event.target.value, 'am2', currency1, currency2)}/> 
                                 </div>
                             </fieldset>
                         </form>
